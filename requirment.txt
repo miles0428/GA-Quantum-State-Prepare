@@ -1,0 +1,5 @@
+numpy
+matplotlib 
+qiskit == 0.24 
+yfinance 
+pandas
