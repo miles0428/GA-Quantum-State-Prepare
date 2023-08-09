@@ -1,5 +1,7 @@
 numpy
 matplotlib 
-qiskit == 0.24 
+qiskit 
 yfinance 
 pandas
+ipywidgets
+qiskit-aer
