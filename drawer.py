@@ -26,7 +26,7 @@ def circuit_0(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
     for i in range(num_qubit):
         if i%2==0 and i!=num_qubit-1:
             circuit.cx(i, i+1)
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_1(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -43,7 +43,7 @@ def circuit_1(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
     for i in range(num_qubit):
         if i%2==1 and i!=num_qubit-1:
             circuit.cx(i, i+1)
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_2(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -60,7 +60,7 @@ def circuit_2(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
     for i in range(num_qubit):
         if i<num_qubit-2:
             circuit.cx(i, i+2)
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_3(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -76,7 +76,7 @@ def circuit_3(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
     circuit = qk.QuantumCircuit(num_qubit)
     for i in range(num_qubit):
         circuit.x(i)
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_4(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -94,7 +94,7 @@ def circuit_4(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
         if i%2==0:
             circuit.ry(qk.circuit.Parameter(f'theta_{theta_index}'), i)
             theta_index+=1
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_5(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -112,7 +112,7 @@ def circuit_5(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
         if i%2==1:
             circuit.ry(qk.circuit.Parameter(f'theta_{theta_index}'), i)
             theta_index+=1
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_6(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -126,7 +126,7 @@ def circuit_6(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
 
     '''
     circuit = qk.QuantumCircuit(num_qubit)
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_7(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -143,7 +143,7 @@ def circuit_7(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
     for i in range(num_qubit):
         if i%2==0 and i!=num_qubit-1:
             circuit.cx(i+1, i)
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_8(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -159,7 +159,7 @@ def circuit_8(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
     for i in range(num_qubit):
         if i%2==1 and i!=num_qubit-1:
             circuit.cx(i+1, i)
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_9(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
@@ -177,7 +177,7 @@ def circuit_9(num_qubit : int ,theta_index :int )->qk.QuantumCircuit:
             circuit.ry(qk.circuit.Parameter(f'theta_{theta_index}'), i)
             theta_index+=1
 
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 def circuit_10(num_qubit :int ,theta_index :int )->qk.QuantumCircuit:
@@ -198,7 +198,7 @@ def circuit_10(num_qubit :int ,theta_index :int )->qk.QuantumCircuit:
             circuit.ry(qk.circuit.Parameter(f'theta_{theta_index}'), i)
             theta_index+=1
     
-    circuit.barrier()
+    # circuit.barrier()
     return (circuit, theta_index)
 
 
@@ -241,6 +241,7 @@ def draw_circuit_from_gene(gene : list, num_qubit : int,filename:str):
         newcircuit = newcircuitinfo[0]
         theta_index = newcircuitinfo[1]
         circuit=circuit.compose(newcircuit)
+
     circuit.measure_all()
     circuit.draw('mpl', filename=filename)
     return circuit
@@ -281,11 +282,55 @@ def load_genes_from_file(filename:str):
     gene = np.load(filename)
     return gene
 
+
 '''
 results structure:
     result = [[fidelity, depth, theta], [fidelity, depth, theta], ...]
     
 genes structure:
     genes = [[gene], [gene], ...]
-    
-    '''
+
+'''
+
+#get all the 10_smallest_depth_gene.npy in all the files in the folder
+#for each folder in the data folder
+#get the generation number
+#load the 10_smallest_depth_gene.npy
+
+#{generation_number: [gene, gene, gene, ...]}
+genes = {}
+for i in range(30) :
+    filename = f'data/{i}st_generation/10_smallest_depth_gene.npy'
+    gene = load_genes_from_file(filename)
+    genes[i] = gene
+
+#load the results
+results = {}
+for i in range(30) :
+    filename = f'data/{i}st_generation/10_smallest_depth_result.npy'
+    result = load_results_from_file(filename)
+    results[i] = result
+
+#draw fidelity change with generation
+fidelity_change = []
+for i in range(30):
+    fidelity_change.append(sum(results[i][:,0])/10)
+plt.clf()
+plt.plot(range(30), fidelity_change)
+plt.savefig('fidelity_change.png')
+
+#draw depth change with generation
+depth_change = []
+for i in range(30):
+    depth_change.append(sum(results[i][:,1])/10)
+plt.clf()
+plt.plot(range(30), depth_change)
+plt.savefig('depth_change.png')
+
+#draw the smallest depth gene for each generation
+for i in range(30):
+    draw_circuit_from_gene(genes[i][0], num_qubit, f'generation_{i}_smallest_depth_gene.png')
+
+#draw prob distribution for the smallest depth gene for each generation
+for i in range(30):
+    draw_prob_distribution(genes[i][0], results[i][0,2], num_qubit, f'generation_{i}_smallest_depth_gene_prob_distribution.png')
