@@ -256,7 +256,8 @@ def get_optimized_fidelity(gene:list, num_qubit:int):
     #optimize the parameter
     circuit = qk.transpile(circuit, backend)
     #load the target distribution
-    target_distribution = np.load('gaussion_avg_7_sigma_4.npy')
+    target_distribution = np.load('log_normal.npy')
+    target_distribution = target_distribution/np.sum(target_distribution)
     #define the fidelity function
     def get_fidelity(theta):
         #calculate the probability distribution
@@ -297,12 +298,12 @@ def get_fidelity_depth(gene):
     fidelity,depth,theta = get_optimized_fidelity(gene, num_qubit)
     return fidelity,depth,theta
 
-# random_gene = np.random.randint(0,11,128*30).reshape(128,30)
-random_gene=np.load('9st_generation/random_gene.npy')
+random_gene = np.random.randint(0,11,128*30).reshape(128,30)
+# random_gene=np.load('9st_generation/random_gene.npy')
 
 mutation_rate = 0.1
 
-for i in range(9,30):
+for i in range(30):
 
     #use multiprocessing to speed up
     pool = mp.Pool(mp.cpu_count())
@@ -310,14 +311,14 @@ for i in range(9,30):
     #mkdir 1st_generation
     result=np.array(result,dtype=object)
     pool.close()
-    os.makedirs(f'{i}st_generation',exist_ok=True)
+    os.makedirs(f'other_distribution/{i}st_generation',exist_ok=True)
     #save the result
-    np.save(f'{i}st_generation/result.npy', result)
+    np.save(f'other_distribution/{i}st_generation/result.npy', result)
     #save the random gene
-    np.save(f'{i}st_generation/random_gene.npy', random_gene)
+    np.save(f'other_distribution/{i}st_generation/random_gene.npy', random_gene)
 
     #load the result
-    result = np.load(f'{i}st_generation/result.npy', allow_pickle=True)
+    result = np.load(f'other_distribution/{i}st_generation/result.npy', allow_pickle=True)
     #plot the result
     # print(result)
 
@@ -336,8 +337,8 @@ for i in range(9,30):
     print(f'depth:{result[index,1]}')
     print(f'fidelity:{result[index,0]}')
     #save the 10 genes
-    np.save(f'{i}st_generation/10_smallest_depth_gene.npy', random_gene[index])
-    np.save(f'{i}st_generation/10_smallest_depth_result.npy', result[index])
+    np.save(f'other_distribution/{i}st_generation/10_smallest_depth_gene.npy', random_gene[index])
+    np.save(f'other_distribution/{i}st_generation/10_smallest_depth_result.npy', result[index])
     
     parent_gene = random_gene[index]
     #use parent gene to generate child gene
