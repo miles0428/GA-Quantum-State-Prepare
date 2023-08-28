@@ -267,7 +267,7 @@ def get_prob_distribution(circuit, theta):
 def draw_prob_distribution(gene,theta,num_qubit,filename:str):
     circuit = generate_circuit_from_gene(gene, num_qubit)
     prob_distribution = get_prob_distribution(circuit, theta)
-    target_distribution = np.load('gaussion_avg_7_sigma_4.npy')
+    target_distribution = np.load('gaussion_avg_7.5_sigma_3.npy')
     plt.clf()
     plt.bar(range(2**num_qubit), prob_distribution)
     plt.plot(np.arange(2**num_qubit), target_distribution, label='target_distribution')
@@ -299,38 +299,38 @@ genes structure:
 
 #{generation_number: [gene, gene, gene, ...]}
 genes = {}
-for i in range(30) :
-    filename = f'data/{i}st_generation/10_smallest_depth_gene.npy'
+for i in range(26) :
+    filename = f'gaussian/data/{i}st_generation/10_smallest_depth_gene.npy'
     gene = load_genes_from_file(filename)
     genes[i] = gene
 
 #load the results
 results = {}
-for i in range(30) :
-    filename = f'data/{i}st_generation/10_smallest_depth_result.npy'
+for i in range(26) :
+    filename = f'gaussian/data/{i}st_generation/10_smallest_depth_result.npy'
     result = load_results_from_file(filename)
     results[i] = result
 
 #draw fidelity change with generation
 fidelity_change = []
-for i in range(30):
+for i in range(26):
     fidelity_change.append(sum(results[i][:,0])/10)
 plt.clf()
-plt.plot(range(30), fidelity_change)
-plt.savefig('fidelity_change.png')
+plt.plot(range(26), fidelity_change)
+plt.savefig('gaussian/fidelity_change.png')
 
 #draw depth change with generation
 depth_change = []
-for i in range(30):
+for i in range(26):
     depth_change.append(sum(results[i][:,1])/10)
 plt.clf()
-plt.plot(range(30), depth_change)
-plt.savefig('depth_change.png')
+plt.plot(range(26), depth_change)
+plt.savefig('gaussian/depth_change.png')
 
 #draw the smallest depth gene for each generation
-for i in range(30):
-    draw_circuit_from_gene(genes[i][0], num_qubit, f'generation_{i}_smallest_depth_gene.png')
+for i in range(26):
+    draw_circuit_from_gene(genes[i][0], num_qubit, f'other_distribution/generation_{i}_smallest_depth_gene.png')
 
 #draw prob distribution for the smallest depth gene for each generation
-for i in range(30):
-    draw_prob_distribution(genes[i][0], results[i][0,2], num_qubit, f'generation_{i}_smallest_depth_gene_prob_distribution.png')
+for i in range(26):
+    draw_prob_distribution(genes[i][0], results[i][0,2], num_qubit, f'other_distribution/generation_{i}_smallest_depth_gene_prob_distribution.png')
