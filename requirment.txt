@@ -5,3 +5,5 @@ yfinance
 pandas
 ipywidgets
 qiskit-aer
+qiskit_algorithms
+pylatexenc
