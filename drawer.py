@@ -1,6 +1,10 @@
 '''
 This file is used to draw the results from the GA
 
+author : Yu-Cheng Chung
+email  : ycchung@ntnu.edu.tw
+date   : 2023 08 Sep
+
 dependencies:
     gene.py
     GA.py

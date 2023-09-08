@@ -1,7 +1,19 @@
+'''
+This file is used to generate a quantum circuit from a gene
+
+author : Yu-Cheng Chung
+email  : ycchung@ntnu.edu.tw
+date   : 2023 08 Sep
+
+dependencies:
+    qiskit
+    numpy
+    
+'''
+
 import qiskit as qk
 import numpy as np
-import matplotlib.pyplot as plt
-from qiskit.algorithms import optimizers
+
 
 class Gene_Circuit(object):
     '''

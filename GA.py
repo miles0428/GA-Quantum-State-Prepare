@@ -1,5 +1,10 @@
 '''
 This file is used to implement the genetic algorithm on the quantum circuit for preparing the target statevector
+
+author : Yu-Cheng Chung
+email  : ycchung@ntnu.edu.tw
+date   : 2023 08 Sep
+
 dependencies:
 
     gene.py
@@ -8,8 +13,8 @@ dependencies:
     multiprocessing
     qiskit_algorithms
 
-'''
 
+'''
 import qiskit as qk
 import numpy as np
 import multiprocessing as mp
