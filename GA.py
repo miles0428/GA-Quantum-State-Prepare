@@ -186,7 +186,7 @@ def _get_index(result : np.ndarray,threshold :float = 0.9) -> np.ndarray:
                 break
     return index
 
-def _best_gene(target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray) -> dict:
+def _best_gene(random_genes:np.ndarray,target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray,kwarg:dict) -> dict:
     '''
     this function is used to get the best gene
     Args:
@@ -196,12 +196,16 @@ def _best_gene(target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray)
     Returns:
         dict_best_gene: the best gene
     '''
+    gene=random_genes[index[0]]
+    num_qubit = kwarg['num_qubit']
+    theta = result[index[0],2]
     dict_best_gene = {'target':target_statevector,
-                      'gene':result[index[0],2],
+                      'gene':gene,
                       'depth':result[index[0],1],
                       'fidelity':result[index[0],0],
                       'theta':result[index[0],2],
-                      'circuit':Gene_Circuit(result[index[0],2],len(target_statevector))}
+                      'num_qubit':num_qubit,
+                      'circuit':Gene_Circuit(gene=gene,num_qubit=num_qubit).bind_parameters(theta)}
     return dict_best_gene
 
 def _get_parent_gene(random_gene : np.ndarray, index : np.ndarray) -> np.ndarray:
@@ -286,7 +290,7 @@ def _save_data(result : np.ndarray,
     np.save(f'{path}/{experiment}/{generation}st_generation/10_smallest_depth_gene.npy', random_gene[index])
     np.save(f'{path}/{experiment}/{generation}st_generation/10_smallest_depth_result.npy', result[index])
     #save the best gene
-    np.save(f'{path}/{experiment}/best_gene.npy', _best_gene(target_statevector,result,index))
+    np.save(f'{path}/{experiment}/best_gene.npy', _best_gene(random_gene,target_statevector,result,index,kwarg))
 
 #rewrite the GA function
 def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
