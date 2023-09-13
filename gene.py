@@ -270,6 +270,80 @@ class Gene_Circuit(object):
                 circuit.ry(qk.circuit.Parameter(f'theta_{theta_index}'), i)
                 theta_index+=1        
         return (circuit, theta_index)
+    #replace the ry gate with rz gate in circuit_4, circuit_5, circuit_9, and circuit_10 make circuit_11, circuit_12, circuit_13, and circuit_14
+    def circuit_11(self,theta_index:int)->qk.QuantumCircuit:
+        '''
+        Generate a quantum circuit with num_qubit qubits
+        add a rz gate to even qubit
+        Args:
+            self.num_qubit: number of qubits
+            theta_index: index of the last theta
+        Returns:
+            circuit: a quantum circuit
+        '''
+        num_qubit = self.num_qubit
+        circuit = qk.QuantumCircuit(num_qubit)
+        for i in range(num_qubit):
+            if i%2==0:
+                circuit.rz(qk.circuit.Parameter(f'theta_{theta_index}'), i)
+                theta_index+=1
+        return (circuit, theta_index)
+    
+    def circuit_12(self,theta_index:int)->qk.QuantumCircuit:
+        '''
+        Generate a quantum circuit with num_qubit qubits
+        add a rz gate to odd qubit
+        Args:
+            self.num_qubit: number of qubits
+            theta_index: index of the last theta
+        Returns:
+            circuit: a quantum circuit
+        '''
+        num_qubit = self.num_qubit
+        circuit = qk.QuantumCircuit(num_qubit)
+        for i in range(num_qubit):
+            if i%2==1:
+                circuit.rz(qk.circuit.Parameter(f'theta_{theta_index}'), i)
+                theta_index+=1
+        return (circuit, theta_index)
+    
+    def circuit_13(self,theta_index:int)->qk.QuantumCircuit:
+        '''
+        Generate a quantum circuit with num_qubit qubits
+        rz for prime number qubit
+        Args:
+            self.num_qubit: number of qubits
+            theta_index: index of the last theta
+        Returns:
+            circuit: a quantum circuit
+        '''
+        num_qubit = self.num_qubit
+        circuit = qk.QuantumCircuit(num_qubit)
+        for i in range(num_qubit):
+            if i in [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47]:
+                circuit.rz(qk.circuit.Parameter(f'theta_{theta_index}'), i)
+                theta_index+=1
+        return (circuit, theta_index)
+    
+    def circuit_14(self,theta_index:int)->qk.QuantumCircuit:
+        '''
+        Generate a quantum circuit with num_qubit qubits
+        rz for not prime number qubit
+        Args:
+            self.num_qubit: number of qubits
+            theta_index: index of the last theta
+        Returns:
+            circuit: a quantum circuit
+        '''
+        num_qubit = self.num_qubit
+        circuit = qk.QuantumCircuit(num_qubit)
+        for i in range(num_qubit):
+            if i not in [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47]:
+                circuit.rz(qk.circuit.Parameter(f'theta_{theta_index}'), i)
+                theta_index+=1
+        return (circuit, theta_index)
+
+    
     
 
 if __name__ == "__main__":

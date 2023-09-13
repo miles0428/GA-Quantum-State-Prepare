@@ -6,7 +6,6 @@ email  : ycchung@ntnu.edu.tw
 date   : 2023 08 Sep
 
 dependencies:
-
     gene.py
     qiskit
     numpy
@@ -201,7 +200,8 @@ def _best_gene(target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray)
                       'gene':result[index[0],2],
                       'depth':result[index[0],1],
                       'fidelity':result[index[0],0],
-                      'theta':result[index[0],2]}
+                      'theta':result[index[0],2],
+                      'circuit':Gene_Circuit(result[index[0],2],len(target_statevector))}
     return dict_best_gene
 
 def _get_parent_gene(random_gene : np.ndarray, index : np.ndarray) -> np.ndarray:
@@ -304,6 +304,8 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         expriement: the name of the expriement. Default: test
         optimizer: the optimizer of the circuit. Default: optimizers.SPSA(maxiter=1000)
         iter: the number of iteration. Default: 30
+        threshold: the threshold of the fidelity. Default: 0.90
+        num_types: the number of types of the gene. Default: 10
     Returns:
         None
     '''
@@ -315,7 +317,8 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                       'expriement':'test',
                       'optimizer':optimizers.SPSA(maxiter=1000),
                       'iter':30,
-                      'threshold':0.90}
+                      'threshold':0.90,
+                      'num_types':15}
     for key in kwargs_default.keys():
         if key not in kwargs.keys():
             kwargs[key] = kwargs_default[key]
@@ -327,7 +330,8 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     optimizer = kwargs['optimizer']
     iter = kwargs['iter']
     threshold = kwargs['threshold']
-    random_gene = np.random.randint(0,11,num_genes*length_gene).reshape(num_genes,length_gene)
+    num_types = kwargs['num_types']
+    random_gene = np.random.randint(0,num_types,num_genes*length_gene).reshape(num_genes,length_gene)
     #create a partial function for multiprocessing
     partial_get_fidelity_depth = partial(_get_fidelity_depth,
                                          num_qubit=num_qubit, 
