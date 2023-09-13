@@ -57,7 +57,7 @@ def get_fidelity(statevector : np.ndarray, target_statevector : np.ndarray) -> f
     fidelity = np.abs(np.dot(np.conj(np.array(statevector)), target_statevector))**2
     return fidelity
 
-def statevector(Gene : Gene_Circuit, theta : np.ndarray, backend : qk.providers.backend) -> np.ndarray:
+def _statevector(Gene : Gene_Circuit, theta : np.ndarray, backend : qk.providers.backend) -> np.ndarray:
     '''
     Get the statevector of a circuit
     Args:
@@ -73,7 +73,7 @@ def statevector(Gene : Gene_Circuit, theta : np.ndarray, backend : qk.providers.
     statevector = result.get_statevector()
     return statevector
 
-def get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,**kwargs) -> (float, int, np.ndarray):
+def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,**kwargs) -> (float, int, np.ndarray):
     '''
     Get the optimized fidelity of a gene
     Args:
@@ -97,17 +97,17 @@ def get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,*
         optimizer = optimizers.SPSA(maxiter=1000)
     #define the loss function
     def loss(theta):
-        fidelity = get_fidelity(statevector(Gene, theta, backend), target_statevector)
+        fidelity = get_fidelity(_statevector(Gene, theta, backend), target_statevector)
         loss = -fidelity
         return loss
     
     theta = optimizer.minimize(loss, x0=theta)
     #get the optimized probability distribution
-    fidelity=get_fidelity(statevector(Gene, theta.x, backend), target_statevector)
+    fidelity=get_fidelity(_statevector(Gene, theta.x, backend), target_statevector)
     depth=Gene.depth()
     return fidelity,depth,theta.x
 
-def get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
+def _get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
     '''
     this function is used to get the fidelity and depth of a gene
     Args:
@@ -138,13 +138,29 @@ def get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
     
     Gene = Gene_Circuit(gene, num_qubit)
     # print(gene)
-    fidelity,depth,theta = get_optimized_fidelity(Gene, target_statevector,optimizer=optimizer)
+    fidelity,depth,theta = _get_optimized_fidelity(Gene, target_statevector,optimizer=optimizer)
     # print(theta)
     # print(statevector(Gene, theta, qk.Aer.get_backend('statevector_simulator')), target_statevector)
     # print(fidelity)
     return fidelity,depth,theta
 
-def get_index(result : np.ndarray) -> np.ndarray:
+def _get_index(result : np.ndarray,threshold :float = 0.9) -> np.ndarray:
+    '''
+    get the index of 10 genes with the smallest depth and fidelity larger than threshold
+    if there is less than 3 genes with fidelity larger than threshold, randomly choose and add 2 genes
+    if there is no gene with fidelity larger than threshold, raise an exception
+    Args:
+        result: the result of the genetic algorithm
+        threshold: the threshold of the fidelity
+    Returns:
+        index: the index of 10 genes with the smallest depth and fidelity larger than threshold
+    Raises:
+        ValueError: if threshold is not between 0 and 1
+        Exception: if there is no gene with fidelity larger than threshold
+    '''
+    if not(0<threshold<1):
+        raise ValueError('threshold should be between 0 and 1')
+    
     ii = 0 #the fidelity threshold
     while (True and ii<100):
         # find the gene with the fidelity larger than 0.99
@@ -152,7 +168,7 @@ def get_index(result : np.ndarray) -> np.ndarray:
         ii += 1
         if np.sum(gene)>=6:
             break
-        elif 0.99 - 0.01*ii<0.9:
+        elif 0.99 - 0.01*ii<threshold:
             if np.sum(gene)>3:
                 break
             elif np.sum(gene)>0:
@@ -161,7 +177,7 @@ def get_index(result : np.ndarray) -> np.ndarray:
                 gene[np.random.randint(0,len(gene))]=True
                 break
             else:
-                raise Exception('No gene with fidelity larger than 0.90')
+                raise Exception('No gene with fidelity larger than threshold')
     index=np.array([]).astype(int)
     #get the index of 10 genes with the smallest depth and fidelity larger than 0.99
     for j in np.argsort(result[:,1]):
@@ -171,7 +187,7 @@ def get_index(result : np.ndarray) -> np.ndarray:
                 break
     return index
 
-def best_gene(target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray) -> dict:
+def _best_gene(target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray) -> dict:
     '''
     this function is used to get the best gene
     Args:
@@ -182,16 +198,24 @@ def best_gene(target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray) 
         dict_best_gene: the best gene
     '''
     dict_best_gene = {'target':target_statevector,
-                    'gene':result[index[0],2],
-                    'depth':result[index[0],1],
-                    'fidelity':result[index[0],0],
-                    'theta':result[index[0],2]}
+                      'gene':result[index[0],2],
+                      'depth':result[index[0],1],
+                      'fidelity':result[index[0],0],
+                      'theta':result[index[0],2]}
     return dict_best_gene
 
-def get_parent_gene(random_gene : np.ndarray, index : np.ndarray) -> np.ndarray:
+def _get_parent_gene(random_gene : np.ndarray, index : np.ndarray) -> np.ndarray:
+    '''
+    this function is used to get the parent gene
+    Args:
+        random_gene: the random gene
+        index: the index of the 10 genes with the smallest depth and fidelity larger than threshold
+    Returns:
+        parent_gene: the parent gene
+    '''
     return random_gene[index]
 
-def get_child_gene(random_gene:np.ndarray,parent_gene : np.ndarray,index :np.ndarray ,kwargs:dict) -> np.ndarray:
+def _get_child_gene(random_gene:np.ndarray,parent_gene : np.ndarray,index :np.ndarray ,kwargs:dict) -> np.ndarray:
     '''
     this function is used to generate child gene
     Args:
@@ -224,6 +248,46 @@ def get_child_gene(random_gene:np.ndarray,parent_gene : np.ndarray,index :np.nda
     child_gene[num_genes-int(num_genes/10)-len(index):num_genes-int(num_genes/10)] = random_gene[index]
     return child_gene.astype(int)
 
+def _save_data(result : np.ndarray, 
+              random_gene : np.ndarray,
+              generation : int,
+              target_statevector : np.ndarray,
+              index : np.ndarray,
+              kwarg : dict) -> None:
+    '''
+    this function is used to save the data
+    will save the result, 
+                  random gene, 
+                  the gene and result of 10 genes with the smallest depth and fidelity larger than threhold, 
+                  and the best gene.
+    Args:
+        result: the result of the genetic algorithm
+        random_gene: the random gene
+        generation: the generation
+        target_statevector: the target statevector
+        index: the index of the 10 genes with the smallest depth and fidelity larger than 0.99
+        kwarg: the kwargs of the genetic algorithm
+    Returns:
+        None
+    '''
+    path = kwarg['path']
+    expriement = kwarg['expriement']
+    os.makedirs(f'{path}/{expriement}/{generation}st_generation',exist_ok=True)
+    #save the result
+    if os.path.exists(f'{path}/{expriement}/{generation}st_generation/result.npy'):
+        print(f'{path}/{expriement}/{generation}st_generation/result.npy already exists')
+    else:
+        np.save(f'{path}/{expriement}/{generation}st_generation/result.npy', result)
+    #save the random gene
+    if os.path.exists(f'{path}/{expriement}/{generation}st_generation/random_gene.npy'):
+        print(f'{path}/{expriement}/{generation}st_generation/random_gene.npy already exists')
+    else:
+        np.save(f'{path}/{expriement}/{generation}st_generation/random_gene.npy', random_gene)
+    np.save(f'{path}/{expriement}/{generation}st_generation/10_smallest_depth_gene.npy', random_gene[index])
+    np.save(f'{path}/{expriement}/{generation}st_generation/10_smallest_depth_result.npy', result[index])
+    #save the best gene
+    np.save(f'{path}/{expriement}/best_gene.npy', _best_gene(target_statevector,result,index))
+
 #rewrite the GA function
 def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     '''
@@ -244,13 +308,14 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         None
     '''
     kwargs_default = {'num_genes':20,
-               'length_gene':10,
-               'mutation_rate':0.1,
-               'cpu_count':mp.cpu_count(),
-               'path':'data',
-               'expriement':'test',
-               'optimizer':optimizers.SPSA(maxiter=1000),
-               'iter':30}
+                      'length_gene':10,
+                      'mutation_rate':0.1,
+                      'cpu_count':mp.cpu_count(),               
+                      'path':'data',
+                      'expriement':'test',
+                      'optimizer':optimizers.SPSA(maxiter=1000),
+                      'iter':30,
+                      'threshold':0.90}
     for key in kwargs_default.keys():
         if key not in kwargs.keys():
             kwargs[key] = kwargs_default[key]
@@ -261,54 +326,51 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     expriement = kwargs['expriement']
     optimizer = kwargs['optimizer']
     iter = kwargs['iter']
+    threshold = kwargs['threshold']
     random_gene = np.random.randint(0,11,num_genes*length_gene).reshape(num_genes,length_gene)
-    partial_get_fidelity_depth = partial(get_fidelity_depth,
+    #create a partial function for multiprocessing
+    partial_get_fidelity_depth = partial(_get_fidelity_depth,
                                          num_qubit=num_qubit, 
                                          target_statevector=target_statevector, 
                                          optimizer=optimizer)
     os.makedirs(path,exist_ok=True)
     os.makedirs(f'{path}/{expriement}',exist_ok=True)
     np.save(f'{path}/{expriement}/target_statevector.npy', target_statevector)
+    caculate = False
     for i in range(iter):
         #check if the data exist
-        if os.path.exists(f'{path}/{expriement}/{i}st_generation/result.npy'):
+        if caculate:
+            pass
+        elif os.path.exists(f'{path}/{expriement}/{i}st_generation/result.npy'):
             if os.path.exists(f'{path}/{expriement}/{i+1}st_generation/random_gene.npy'):
+                print(f'generation {i} finished')
                 continue
             else:
                 result = np.load(f'{path}/{expriement}/{i}st_generation/result.npy', allow_pickle=True)
                 random_gene = np.load(f'{path}/{expriement}/{i}st_generation/random_gene.npy', allow_pickle=True)
-                index=get_index(result)
-                print(f'depth:{result[index,1]}')
-                print(f'fidelity:{result[index,0]}')
-                #save the 10 genes
-                np.save(f'{path}/{expriement}/{i}st_generation/10_smallest_depth_gene.npy', random_gene[index])
-                np.save(f'{path}/{expriement}/{i}st_generation/10_smallest_depth_result.npy', result[index])
-                #save the best gene
-                np.save(f'{path}/{expriement}/best_gene.npy', best_gene(target_statevector,result,index))
-                random_gene = get_child_gene(random_gene,get_parent_gene(random_gene,index),index,kwargs)
+                index=_get_index(result,threshold=threshold)
+                print(f'depth:{result[index,1]}\nfidelity:{result[index,0]}')
+                #save the result
+                _save_data(result,random_gene,i,target_statevector,index,kwargs)
+                random_gene = _get_child_gene(random_gene,_get_parent_gene(random_gene,index),index,kwargs)
                 print(f'generation {i} finished')
+                caculate = True
                 continue
+        else:
+            caculate = True
 
+        os.makedirs(f'{path}/{expriement}/{i}st_generation',exist_ok=True)
         #use multiprocessing to speed up
         pool = mp.Pool(cpu_count)
         result = pool.map(partial_get_fidelity_depth, random_gene)
         #mkdir ist_generation
         result=np.array(result,dtype=object)
         pool.close()
-        os.makedirs(f'{path}/{expriement}/{i}st_generation',exist_ok=True)
         #save the result
-        np.save(f'{path}/{expriement}/{i}st_generation/result.npy', result)
-        #save the random gene
-        np.save(f'{path}/{expriement}/{i}st_generation/random_gene.npy', random_gene)
-        index=get_index(result)
-        print(f'depth:{result[index,1]}')
-        print(f'fidelity:{result[index,0]}')
-        #save the 10 genes
-        np.save(f'{path}/{expriement}/{i}st_generation/10_smallest_depth_gene.npy', random_gene[index])
-        np.save(f'{path}/{expriement}/{i}st_generation/10_smallest_depth_result.npy', result[index])
-        #save the best gene
-        np.save(f'{path}/{expriement}/best_gene.npy', best_gene(target_statevector,result,index))
-        random_gene = get_child_gene(random_gene,get_parent_gene(random_gene,index),index,kwargs)
+        index=_get_index(result,threshold=threshold)
+        print(f'depth:{result[index,1]}\nfidelity:{result[index,0]}')
+        _save_data(result,random_gene,i,target_statevector,index,kwargs)
+        random_gene = _get_child_gene(random_gene,_get_parent_gene(random_gene,index),index,kwargs)
         print(f'generation {i} finished')
 
 
