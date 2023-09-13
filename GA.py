@@ -271,22 +271,22 @@ def _save_data(result : np.ndarray,
         None
     '''
     path = kwarg['path']
-    expriement = kwarg['expriement']
-    os.makedirs(f'{path}/{expriement}/{generation}st_generation',exist_ok=True)
+    experiment = kwarg['experiment']
+    os.makedirs(f'{path}/{experiment}/{generation}st_generation',exist_ok=True)
     #save the result
-    if os.path.exists(f'{path}/{expriement}/{generation}st_generation/result.npy'):
-        print(f'{path}/{expriement}/{generation}st_generation/result.npy already exists')
+    if os.path.exists(f'{path}/{experiment}/{generation}st_generation/result.npy'):
+        print(f'{path}/{experiment}/{generation}st_generation/result.npy already exists')
     else:
-        np.save(f'{path}/{expriement}/{generation}st_generation/result.npy', result)
+        np.save(f'{path}/{experiment}/{generation}st_generation/result.npy', result)
     #save the random gene
-    if os.path.exists(f'{path}/{expriement}/{generation}st_generation/random_gene.npy'):
-        print(f'{path}/{expriement}/{generation}st_generation/random_gene.npy already exists')
+    if os.path.exists(f'{path}/{experiment}/{generation}st_generation/random_gene.npy'):
+        print(f'{path}/{experiment}/{generation}st_generation/random_gene.npy already exists')
     else:
-        np.save(f'{path}/{expriement}/{generation}st_generation/random_gene.npy', random_gene)
-    np.save(f'{path}/{expriement}/{generation}st_generation/10_smallest_depth_gene.npy', random_gene[index])
-    np.save(f'{path}/{expriement}/{generation}st_generation/10_smallest_depth_result.npy', result[index])
+        np.save(f'{path}/{experiment}/{generation}st_generation/random_gene.npy', random_gene)
+    np.save(f'{path}/{experiment}/{generation}st_generation/10_smallest_depth_gene.npy', random_gene[index])
+    np.save(f'{path}/{experiment}/{generation}st_generation/10_smallest_depth_result.npy', result[index])
     #save the best gene
-    np.save(f'{path}/{expriement}/best_gene.npy', _best_gene(target_statevector,result,index))
+    np.save(f'{path}/{experiment}/best_gene.npy', _best_gene(target_statevector,result,index))
 
 #rewrite the GA function
 def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
@@ -301,7 +301,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         mutation_rate: the mutation rate. Default: 0.1
         cpu_count: the number of cpu used. Default: mp.cpu_count()
         path: the path to save the result. Default: data
-        expriement: the name of the expriement. Default: test
+        experiment: the name of the experiment. Default: test
         optimizer: the optimizer of the circuit. Default: optimizers.SPSA(maxiter=1000)
         iter: the number of iteration. Default: 30
         threshold: the threshold of the fidelity. Default: 0.90
@@ -314,7 +314,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                       'mutation_rate':0.1,
                       'cpu_count':mp.cpu_count(),               
                       'path':'data',
-                      'expriement':'test',
+                      'experiment':'test',
                       'optimizer':optimizers.SPSA(maxiter=1000),
                       'iter':30,
                       'threshold':0.90,
@@ -326,7 +326,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     length_gene = kwargs['length_gene']
     cpu_count = kwargs['cpu_count']
     path = kwargs['path']
-    expriement = kwargs['expriement']
+    experiment = kwargs['experiment']
     optimizer = kwargs['optimizer']
     iter = kwargs['iter']
     threshold = kwargs['threshold']
@@ -338,20 +338,20 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                                          target_statevector=target_statevector, 
                                          optimizer=optimizer)
     os.makedirs(path,exist_ok=True)
-    os.makedirs(f'{path}/{expriement}',exist_ok=True)
-    np.save(f'{path}/{expriement}/target_statevector.npy', target_statevector)
+    os.makedirs(f'{path}/{experiment}',exist_ok=True)
+    np.save(f'{path}/{experiment}/target_statevector.npy', target_statevector)
     caculate = False
     for i in range(iter):
         #check if the data exist
         if caculate:
             pass
-        elif os.path.exists(f'{path}/{expriement}/{i}st_generation/result.npy'):
-            if os.path.exists(f'{path}/{expriement}/{i+1}st_generation/random_gene.npy'):
+        elif os.path.exists(f'{path}/{experiment}/{i}st_generation/result.npy'):
+            if os.path.exists(f'{path}/{experiment}/{i+1}st_generation/random_gene.npy'):
                 print(f'generation {i} finished')
                 continue
             else:
-                result = np.load(f'{path}/{expriement}/{i}st_generation/result.npy', allow_pickle=True)
-                random_gene = np.load(f'{path}/{expriement}/{i}st_generation/random_gene.npy', allow_pickle=True)
+                result = np.load(f'{path}/{experiment}/{i}st_generation/result.npy', allow_pickle=True)
+                random_gene = np.load(f'{path}/{experiment}/{i}st_generation/random_gene.npy', allow_pickle=True)
                 index=_get_index(result,threshold=threshold)
                 print(f'depth:{result[index,1]}\nfidelity:{result[index,0]}')
                 #save the result
@@ -363,7 +363,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         else:
             caculate = True
 
-        os.makedirs(f'{path}/{expriement}/{i}st_generation',exist_ok=True)
+        os.makedirs(f'{path}/{experiment}/{i}st_generation',exist_ok=True)
         #use multiprocessing to speed up
         pool = mp.Pool(cpu_count)
         result = pool.map(partial_get_fidelity_depth, random_gene)
@@ -379,4 +379,4 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
 
 
 if __name__ == '__main__':
-    GA(np.array([1,0,0,0,0,0,0,-1])/np.sqrt(2), 3, iter=3, expriement='test')
+    GA(np.array([1,0,0,0,0,0,0,-1])/np.sqrt(2), 3, iter=3, experiment='test')

@@ -1,3 +1,13 @@
+'''
+this module contains the gaussian function
+author : Yu-Cheng Chung
+email  : ycchung@ntnu.edu.tw
+date   : 2023 13 Sep
+
+dependencies:
+    numpy
+    matplotlib
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 import transform
@@ -16,7 +26,9 @@ def gaussian(x:int|float|np.ndarray, mu:int|float = 0 , sigma:int|float = 1 )->i
     return 1/(sigma * (2 * np.pi)**0.5) * np.exp(-0.5 * ((x - mu)/sigma)**2)
 
 
-vector=gaussian(np.arange(16),mu=8,sigma=2)
-t_vector=transform.normalize_prob_distribution(vector)
-plt.bar(range(16),t_vector)
-plt.plot(np.arange(16),vector)
+if __name__ == '__main__':
+    #test the gaussian function
+    vector=gaussian(np.arange(16),mu=8,sigma=2)
+    t_vector=transform.normalize_prob_distribution(vector)
+    plt.bar(range(16),t_vector)
+    plt.plot(np.arange(16),vector)
