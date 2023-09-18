@@ -64,7 +64,8 @@ def statevector2prob(state_vector : np.ndarray[float|int|complex])->np.ndarray[f
         the probability distribution
     '''
     #check if state_vector has been normalized
-    if abs(np.sum(np.conjugate(state_vector) * state_vector) - 1) > 1e-5:
+    state_vector = np.array(state_vector)
+    if abs(np.sum(np.conjugate(np.array(state_vector)) * np.array(state_vector)) - 1) > 1e-5:
         raise ValueError('state_vector should be normalized')
     degger = np.conjugate(state_vector)
     return abs(degger * state_vector).astype(float)

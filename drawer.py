@@ -28,7 +28,8 @@ def draw_prob_distribution(gene : list,
                            theta : list|np.ndarray, 
                            num_qubit : int, 
                            target_distribution : list|np.ndarray, 
-                           filename:str) -> None:
+                           filename:str,
+                           method : str = 'qasm') -> None:
     '''
     Draw the probability distribution of a circuit and the target distribution
     Args:
@@ -37,11 +38,12 @@ def draw_prob_distribution(gene : list,
         num_qubit: number of qubits
         target_distribution: the target distribution
         filename: the filename of the picture
+        method: the method to get the probability distribution
     Returns:
         None
     '''
     circuit = Gene_Circuit(gene, num_qubit).circuit
-    prob_distribution = get_prob_distribution(circuit, theta)
+    prob_distribution = get_prob_distribution(circuit, theta,method=method)
     plt.clf()
     plt.bar(range(2**num_qubit), prob_distribution)
     plt.plot(np.arange(2**num_qubit), target_distribution, label='target_distribution')

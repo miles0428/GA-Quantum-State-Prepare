@@ -21,26 +21,37 @@ from qiskit_algorithms import optimizers
 import os
 from gene import Gene_Circuit
 from functools import partial
+import transform
 
-def get_prob_distribution(circuit : qk.QuantumCircuit, theta : list|np.ndarray, num_qubits :int) -> np.ndarray:
+def get_prob_distribution(circuit : qk.QuantumCircuit, theta : list|np.ndarray, method : str = 'qasm') -> np.ndarray:
     '''
     Get the probability distribution of a circuit
     Args:
         circuit: a quantum circuit
         theta: a list of theta
-        num_qubits: number of qubits
+        method: the method to get the probability distribution. Default: 'qasm'
     Returns:
         prob_distribution: the probability distribution of the circuit
     '''
     circuit = circuit.bind_parameters({circuit.parameters[i]:theta[i] for i in range(len(theta))})
-    circuit.measure_all()
-    backend = qk.Aer.get_backend('qasm_simulator')
-    job = qk.execute(circuit, backend, shots=1000)
-    result = job.result()
-    counts = result.get_counts()
-    prob_distribution = np.zeros(2**num_qubits)
-    for key in counts.keys():
-        prob_distribution[int(key, 2)] = counts[key]/1000
+    num_qubits = circuit.num_qubits
+    if method == 'qasm':
+        circuit.measure_all()
+        backend = qk.Aer.get_backend('qasm_simulator')
+        job = qk.execute(circuit, backend, shots=1000)
+        result = job.result()
+        counts = result.get_counts()
+        prob_distribution = np.zeros(2**num_qubits)
+        for key in counts.keys():
+            prob_distribution[int(key, 2)] = counts[key]/1000
+    elif method == 'statevector':
+        backend = qk.Aer.get_backend('statevector_simulator')
+        job = qk.execute(circuit, backend)
+        result = job.result()
+        statevector = result.get_statevector()
+        prob_distribution = transform.statevector2prob(statevector)
+    else:
+        raise Exception('method should be qasm or statevector')
     return prob_distribution
 
 #define the fidelity function
