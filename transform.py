@@ -35,8 +35,10 @@ def normalize_state_vector(vector : np.ndarray[float|int|complex])->np.ndarray[i
     Returns:
         the state vector
     '''
+    #check if vector has been normalized
+    vector = np.array(vector)
     product = np.conjugate(vector) * vector
-    return vector/abs(np.sum(product))
+    return vector/np.sqrt(abs(np.sum(product)))
 
 def prob2statevector(prob_distribution : np.ndarray[int|float])->np.ndarray[int|float|complex]:
     '''
