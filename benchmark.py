@@ -9,6 +9,7 @@ import transform
 from qiskit_algorithms import optimizers
 import multiprocessing as mp
 from qiskit import qpy
+import os
 
 
 
@@ -21,8 +22,6 @@ def initialize_circuit(num_qubits,statevector) -> qk.QuantumCircuit:
     circuit.initialize(statevector,qubit)
     circuit_n=qk.compiler.transpile(circuit,basis_gates=basis_gates)
     return circuit_n
-
-
 
 def main():
     seed = 10292
@@ -48,12 +47,13 @@ def main():
             threshold = 0.90,
             num_types = 15)
         #initialize
-        depths_GA.append(np.load(f'data/{experiment}/GA/best_gene.npy',allow_pickle=True)['depth'])
+        depths_GA.append(np.load(f'data/{experiment}/GA/best_gene.npy',allow_pickle=True).item()['depth'])
         circuit = initialize_circuit(num_qubits,target_statevector)
         #get the depth of the circuit
         depth_initialize = circuit.depth()
         depths_initialize.append(depth_initialize)
         #save the depth
+        os.makedirs(f'data/{experiment}/qiskit',exist_ok=True)
         np.save(f'data/{experiment}/qiskit/initialize.npy',depth_initialize)
         #save the target statevector
         np.save(f'data/{experiment}/qiskit/target_statevector.npy',target_statevector)
@@ -71,16 +71,6 @@ def plot_bechmark(depths_GA,depths_qiskit):
     #x=y
     plt.plot(np.arange(0,max(max(depths_GA),max(depths_qiskit))),np.arange(0,max(max(depths_GA),max(depths_qiskit))))
     plt.savefig('benchmark/benchmark.png')
-
-
-
-    
-    
-    
-
-
-
-
 
 if __name__ == '__main__':
     main()
