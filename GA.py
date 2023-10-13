@@ -92,13 +92,19 @@ def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,
     
     kwargs:
         optimizer: the optimizer of the circuit. Default: optimizers.SPSA(maxiter=1000)
+        GPU: if the computer have an avaliable gpu. Default: False
 
     Returns:
         fidelity: the optimized fidelity of the gene
         depth: the depth of the circuit
         theta: the optimized theta
     '''
-    backend = qk.Aer.get_backend('statevector_simulator')
+    if kwargs['GPU']:
+        backend = qk.Aer.get_backend('statevector_simulator')
+        backend.set_options(device='GPU')
+    else:
+        backend = qk.Aer.get_backend('statevector_simulator')
+
     num_parameters = Gene.num_parameters
     theta = np.random.rand(num_parameters)
     try:
@@ -148,7 +154,7 @@ def _get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
     
     Gene = Gene_Circuit(gene, num_qubit)
     # print(gene)
-    fidelity,depth,theta = _get_optimized_fidelity(Gene, target_statevector,optimizer=optimizer)
+    fidelity,depth,theta = _get_optimized_fidelity(Gene, target_statevector,optimizer=optimizer,GPU=kwargs['GPU'])
     # print(theta)
     # print(statevector(Gene, theta, qk.Aer.get_backend('statevector_simulator')), target_statevector)
     # print(fidelity)
@@ -322,13 +328,13 @@ def _gpu_avaliable() -> bool:
     Returns:
         gpu_avaliable: if the computer have an avaliable gpu 
     '''
-    gpu_avaliable = False
     try:
-        _ = qk.Aer.get_backend('statevector_simulator_gpu')
-        gpu_avaliable = True
-    except:
-        pass
-    return gpu_avaliable
+        backend = qk.Aer.get_backend('statevector_simulator')
+        backend.set_options(device='GPU')
+        qk.execute(qk.QuantumCircuit(1),backend).result()
+        return True
+    except :
+        return False
 
 #rewrite the GA function
 def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
@@ -349,6 +355,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         miniter: the number of min iteration. Default: 10
         threshold: the threshold of the fidelity. Default: 0.90
         num_types: the number of types of the gate. Default: 7
+        GPU: if the computer have an avaliable gpu. Default: check if the computer have an avaliable gpu
     Returns:
         None
     '''
@@ -362,7 +369,8 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                       'maxiter':30,
                       'miniter':10, 
                       'threshold':0.90,
-                      'num_types':7}
+                      'num_types':7,
+                      'GPU':_gpu_avaliable()}
     for key in kwargs_default.keys():
         if key not in kwargs.keys():
             kwargs[key] = kwargs_default[key]
@@ -386,7 +394,8 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     partial_get_fidelity_depth = partial(_get_fidelity_depth,
                                          num_qubit=num_qubit, 
                                          target_statevector=target_statevector, 
-                                         optimizer=optimizer)
+                                         optimizer=optimizer,
+                                         GPU = kwargs['GPU'])
     os.makedirs(path,exist_ok=True)
     os.makedirs(f'{path}/{experiment}',exist_ok=True)
     np.save(f'{path}/{experiment}/target_statevector.npy', target_statevector)

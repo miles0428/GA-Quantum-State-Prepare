@@ -1,0 +1,9 @@
+numpy
+matplotlib 
+qiskit 
+yfinance 
+pandas
+ipywidgets
+qiskit-aer-gpu
+qiskit_algorithms
+pylatexenc
