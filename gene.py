@@ -3,7 +3,7 @@ This file is used to generate a quantum circuit from a gene
 
 author : Yu-Cheng Chung
 email  : ycchung@ntnu.edu.tw
-date   : 2023 08 Sep
+date   : 2023 12 oct
 
 dependencies:
     qiskit
@@ -31,7 +31,7 @@ class Gene_Circuit(object):
             num_qubit: number of qubits
         
         object:
-            self.gene: a list of 0-10
+            self.gene: a array with shape (num_qubit, length_gene) with element called G_ij
             self.num_qubit: number of qubits
             self.circuit: a quantum circuit with num_qubit qubits generated from gene
             self.draw: draw the circuit
@@ -94,11 +94,9 @@ class Gene_Circuit(object):
                 control = G_ij[1]
                 if control >= self.num_qubit:
                     control = control % self.num_qubit
-                    print(control)
                 if gate == 'empty':
                     continue
                 elif gate in ['rx','ry','rz']:
-
                     getattr(circuit,gate)(qk.circuit.Parameter(f'theta_{theta_index}'),i)
                     theta_index+=1
                 elif gate == 'cx':
@@ -111,20 +109,14 @@ class Gene_Circuit(object):
 
         return circuit
     
-    
-
 if __name__ == '__main__':
     '''
-    test gene 
-    --------------------------
-    |[0,5]|[0,0]|[1,3]|[0,0]|
-    --------------------------
-    |[0,0]|[0,0]|[0,0]|[0,0]|
-    --------------------------
-    |[4,1]|[0,0]|[4,0]|[4,3]|
-    --------------------------
-    |[5,2]|[0,0]|[0,0]|[0,0]|
-    --------------------------
+    test gene:
+
+        [[[0,5],[4,0],[1,3],[2,4]],
+         [[0,0],[0,0],[0,0],[0,0]],
+         [[4,1],[0,0],[4,0],[4,3]],
+         [[5,2],[0,0],[4,3],[4,4]]]
 
     the circuit would look like:
 
@@ -138,12 +130,13 @@ if __name__ == '__main__':
     q_3: ─────┤ H ├─────────────────■───────┤ X ├
               └───┘                         └───┘
     '''
-    gene = np.array([[[0,5],[0,0],[1,3],[2,4]],
+    gene = np.array([[[0,5],[4,0],[1,3],[2,4]],
                      [[0,0],[0,0],[0,0],[0,0]],
                      [[4,1],[0,0],[4,0],[4,3]],
                      [[5,2],[0,0],[4,3],[4,4]]])
     num_qubit = 4
     gene_circuit = Gene_Circuit(gene,num_qubit)
+    print(gene)
     print(gene_circuit.draw())
     print(gene_circuit.num_parameters)
     print(gene_circuit.depth())

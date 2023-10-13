@@ -121,7 +121,7 @@ def _get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
     '''
     this function is used to get the fidelity and depth of a gene
     Args:
-        gene: a list of 0-10
+        gene: a array with shape (num_qubit, length_gene) with element called G_ij
 
     kwargs:
         num_qubit: number of qubits
@@ -244,7 +244,10 @@ def _get_child_gene(random_gene:np.ndarray,parent_gene : np.ndarray,index :np.nd
     num_genes = kwargs['num_genes']
     length_gene = kwargs['length_gene']
     mutation_rate = kwargs['mutation_rate']
-    child_gene = np.zeros((num_genes,length_gene)).astype(int)
+    num_qubit = kwargs['num_qubit']
+    num_types = kwargs['num_types']
+    # child_gene = np.zeros((num_genes,length_gene)).astype(int)
+    child_gene = np.zeros((num_genes, num_qubit, length_gene, 2)).astype(int)
     for j in range(num_genes):
         #randomly choose a parent gene
         parent = [np.random.randint(0,len(index)), np.random.randint(0,len(index))]
@@ -253,13 +256,20 @@ def _get_child_gene(random_gene:np.ndarray,parent_gene : np.ndarray,index :np.nd
         #randomly choose a crossover point
         crossover_point = np.random.randint(1,length_gene-1)
         #generate child gene
-        child_gene[j] = np.concatenate((parent_gene[parent[0]][:crossover_point], parent_gene[parent[1]][crossover_point:]))
+        child_gene[j] = np.concatenate((parent_gene[parent[0]][:,:crossover_point,:], 
+                                        parent_gene[parent[1]][:,crossover_point:,:]), 
+                                        axis=1)
         #randomly mutate the child gene
-        for k in range(length_gene):
-            if np.random.rand()<mutation_rate:
-                child_gene[j][k]=np.random.randint(0,11)
+        for k in range(num_qubit):
+            for l in range(length_gene):
+                if np.random.rand()<mutation_rate:
+                    child_gene[j][k][l]=(np.random.randint(0,num_types), np.random.randint(0,num_qubit))
+
     #randomly generate 10% genes
-    child_gene[num_genes-int(num_genes/10):] = np.random.randint(0,11,int(num_genes/10)*length_gene).reshape(int(num_genes/10),length_gene)
+    child_gene[num_genes-int(num_genes/10):] = np.concatenate(
+        (np.random.randint(low=0, high=num_types, size=(int(num_genes/10), num_qubit, length_gene, 1)), 
+         np.random.randint(low=0, high=num_qubit, size=(int(num_genes/10), num_qubit, length_gene, 1))), 
+        axis=3)
     #add the 10 genes with the smallest depth
     child_gene[num_genes-int(num_genes/10)-len(index):num_genes-int(num_genes/10)] = random_gene[index]
     return child_gene.astype(int)
@@ -270,7 +280,7 @@ def _save_data(result : np.ndarray,
               target_statevector : np.ndarray,
               index : np.ndarray,
               num_qubit : int,
-              kwarg : dict) -> None:
+              kwargs : dict) -> None:
     '''
     this function is used to save the data
     will save the result, 
@@ -288,8 +298,8 @@ def _save_data(result : np.ndarray,
     Returns:
         None
     '''
-    path = kwarg['path']
-    experiment = kwarg['experiment']
+    path = kwargs['path']
+    experiment = kwargs['experiment']
     os.makedirs(f'{path}/{experiment}/{generation}st_generation',exist_ok=True)
     #save the result
     if os.path.exists(f'{path}/{experiment}/{generation}st_generation/result.npy'):
@@ -306,6 +316,20 @@ def _save_data(result : np.ndarray,
     #save the best gene
     np.save(f'{path}/{experiment}/best_gene.npy', _best_gene(random_gene,target_statevector,result,index,num_qubit=num_qubit))
 
+def _gpu_avaliable() -> bool:
+    '''
+    check if the computer have an avaliable gpu
+    Returns:
+        gpu_avaliable: if the computer have an avaliable gpu 
+    '''
+    gpu_avaliable = False
+    try:
+        _ = qk.Aer.get_backend('statevector_simulator_gpu')
+        gpu_avaliable = True
+    except:
+        pass
+    return gpu_avaliable
+
 #rewrite the GA function
 def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     '''
@@ -321,9 +345,10 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         path: the path to save the result. Default: data
         experiment: the name of the experiment. Default: test
         optimizer: the optimizer of the circuit. Default: optimizers.SPSA(maxiter=1000)
-        iter: the number of iteration. Default: 30
+        maxiter: the number of max iteration. Default: 30
+        miniter: the number of min iteration. Default: 10
         threshold: the threshold of the fidelity. Default: 0.90
-        num_types: the number of types of the gene. Default: 10
+        num_types: the number of types of the gate. Default: 7
     Returns:
         None
     '''
@@ -334,9 +359,10 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                       'path':'data',
                       'experiment':'test',
                       'optimizer':optimizers.SPSA(maxiter=1000),
-                      'iter':30,
+                      'maxiter':30,
+                      'miniter':10, 
                       'threshold':0.90,
-                      'num_types':15}
+                      'num_types':7}
     for key in kwargs_default.keys():
         if key not in kwargs.keys():
             kwargs[key] = kwargs_default[key]
@@ -346,10 +372,16 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     path = kwargs['path']
     experiment = kwargs['experiment']
     optimizer = kwargs['optimizer']
-    iter = kwargs['iter']
+    maxiter = kwargs['maxiter']
     threshold = kwargs['threshold']
     num_types = kwargs['num_types']
-    random_gene = np.random.randint(0,num_types,num_genes*length_gene).reshape(num_genes,length_gene)
+    miniter = kwargs['miniter']
+    kwargs['num_qubit'] = num_qubit
+    #generate random gene
+    # random_gene = np.random.randint(0,num_types,num_genes*length_gene).reshape(num_genes,length_gene)
+    random_gene = np.concatenate((np.random.randint(low=0, high=num_types, size=(num_genes, num_qubit, length_gene, 1)), 
+                                  np.random.randint(low=0, high=num_qubit, size=(num_genes, num_qubit, length_gene, 1))), 
+                                  axis=3)
     #create a partial function for multiprocessing
     partial_get_fidelity_depth = partial(_get_fidelity_depth,
                                          num_qubit=num_qubit, 
@@ -359,7 +391,8 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     os.makedirs(f'{path}/{experiment}',exist_ok=True)
     np.save(f'{path}/{experiment}/target_statevector.npy', target_statevector)
     caculate = False
-    for i in range(iter):
+    record_depth = dict()
+    for i in range(maxiter):
         #check if the data exist
         if caculate:
             pass
@@ -374,13 +407,13 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                 print(f'depth:{result[index,1]}\nfidelity:{result[index,0]}')
                 #save the result
                 _save_data(result,random_gene,i,target_statevector,index,num_qubit,kwargs)
-                random_gene = _get_child_gene(random_gene,_get_parent_gene(random_gene,index),index,kwargs)
+                parent = _get_parent_gene(random_gene,index)
+                random_gene = _get_child_gene(random_gene,parent,index,kwargs)
                 print(f'generation {i} finished')
                 caculate = True
                 continue
         else:
             caculate = True
-
         os.makedirs(f'{path}/{experiment}/{i}st_generation',exist_ok=True)
         #use multiprocessing to speed up
         pool = mp.Pool(cpu_count)
@@ -394,7 +427,15 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         _save_data(result,random_gene,i,target_statevector,index,num_qubit,kwargs)
         random_gene = _get_child_gene(random_gene,_get_parent_gene(random_gene,index),index,kwargs)
         print(f'generation {i} finished')
-
+        record_depth[i%10] = np.array(result[index,1])
+        if len(record_depth[i%10])<10:
+            #fill 1e10 to the array
+            record_depth[i%10] = np.concatenate((record_depth[i%10],np.ones(10-len(record_depth[i%10]))*1e10))
+        #check convergence
+        if i>=miniter-1: #check 10 generations before
+            #check the standard deviation of the depth
+            if np.std(np.array(record_depth.values()))<1e-3:
+                break
 
 if __name__ == '__main__':
     GA(np.array([1,0,0,0,0,0,0,-1])/np.sqrt(2), 3, iter=3, experiment='test')
