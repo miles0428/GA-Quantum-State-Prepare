@@ -22,6 +22,7 @@ import os
 from gene import Gene_Circuit
 from functools import partial
 import transform
+mp.set_start_method('spawn',True)
 
 def get_prob_distribution(circuit : qk.QuantumCircuit, theta : list|np.ndarray, method : str = 'qasm') -> np.ndarray:
     '''
