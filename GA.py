@@ -100,9 +100,11 @@ def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,
         theta: the optimized theta
     '''
     if kwargs['GPU']:
+        print('GPU')
         backend = qk.Aer.get_backend('statevector_simulator')
         backend.set_options(device='GPU')
     else:
+        print('no GPU')
         backend = qk.Aer.get_backend('statevector_simulator')
 
     num_parameters = Gene.num_parameters
