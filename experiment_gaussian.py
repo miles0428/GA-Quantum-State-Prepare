@@ -39,7 +39,7 @@ GPU = False
 #generate 15 mu from 0 to 15
 mu = np.linspace(0,31,8)
 #generate 15 sigma from 0 to 15
-sigma = np.linspace(0,31,8)
+sigma = np.linspace(1,20,8)
 #generate the target distribution
 #use mu and sigma to generate 15*15 target distribution
 for i in range(8):
