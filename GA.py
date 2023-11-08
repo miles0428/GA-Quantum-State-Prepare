@@ -123,6 +123,7 @@ def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,
     depth=Gene.depth()
     return fidelity,depth,theta.x
 
+
 def _get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
     '''
     this function is used to get the fidelity and depth of a gene
@@ -159,6 +160,7 @@ def _get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
     # print(statevector(Gene, theta, qk.Aer.get_backend('statevector_simulator')), target_statevector)
     # print(fidelity)
     return fidelity,depth,theta
+
 
 def _get_index(result : np.ndarray,threshold :float = 0.9) -> np.ndarray:
     '''
@@ -203,6 +205,7 @@ def _get_index(result : np.ndarray,threshold :float = 0.9) -> np.ndarray:
                 break
     return index
 
+
 def _best_gene(random_genes:np.ndarray,target_statevector:np.ndarray,result:np.ndarray,index:np.ndarray,num_qubit:int) -> dict:
     '''
     this function is used to get the best gene
@@ -226,6 +229,7 @@ def _best_gene(random_genes:np.ndarray,target_statevector:np.ndarray,result:np.n
                       'circuit':Gene_Circuit(gene=gene,num_qubit=num_qubit).bind_parameters(theta)}
     return dict_best_gene
 
+
 def _get_parent_gene(random_gene : np.ndarray, index : np.ndarray) -> np.ndarray:
     '''
     this function is used to get the parent gene
@@ -236,6 +240,7 @@ def _get_parent_gene(random_gene : np.ndarray, index : np.ndarray) -> np.ndarray
         parent_gene: the parent gene
     '''
     return random_gene[index]
+
 
 def _get_child_gene(random_gene:np.ndarray,parent_gene : np.ndarray,index :np.ndarray ,kwargs:dict) -> np.ndarray:
     '''
@@ -280,6 +285,7 @@ def _get_child_gene(random_gene:np.ndarray,parent_gene : np.ndarray,index :np.nd
     child_gene[num_genes-int(num_genes/10)-len(index):num_genes-int(num_genes/10)] = random_gene[index]
     return child_gene.astype(int)
 
+
 def _save_data(result : np.ndarray, 
               random_gene : np.ndarray,
               generation : int,
@@ -322,6 +328,7 @@ def _save_data(result : np.ndarray,
     #save the best gene
     np.save(f'{path}/{experiment}/best_gene.npy', _best_gene(random_gene,target_statevector,result,index,num_qubit=num_qubit))
 
+
 def _gpu_avaliable() -> bool:
     '''
     check if the computer have an avaliable gpu
@@ -335,6 +342,7 @@ def _gpu_avaliable() -> bool:
         return True
     except :
         return False
+
 
 #rewrite the GA function
 def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
@@ -445,6 +453,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
             #check the standard deviation of the depth
             if np.std(np.array(record_depth.values()))<1e-3:
                 break
+
 
 if __name__ == '__main__':
     GA(np.array([1,0,0,0,0,0,0,-1])/np.sqrt(2), 3, iter=3, experiment='test')

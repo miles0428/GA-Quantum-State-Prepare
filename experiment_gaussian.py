@@ -24,25 +24,40 @@ from qiskit_algorithms import optimizers
 
 #set the parameters
 num_genes = mp.cpu_count()
-num_qubit = 4
-length_gene = 25
+num_qubit = 5
+length_gene = 100
 mutation_rate = 0.1
 cpu_count = mp.cpu_count()
-path = 'data/gaussian/'
+path = 'data/GA-data/gaussian/diff-genetic'
 optimizer = optimizers.SPSA(maxiter=1000)
-iter = 50
+maxiter = 100
+miniter = 10
 threshold = 0.90
-num_types = 15
+GPU = False
+'''
+'num_genes':20,
+'length_gene':10,
+'mutation_rate':0.1,
+'cpu_count':mp.cpu_count(),               
+'path':'data',
+'experiment':'test',
+'optimizer':optimizers.SPSA(maxiter=1000),
+'maxiter':30,
+'miniter':10, 
+'threshold':0.90,
+'num_types':7,
+'GPU':_gpu_avaliable()
+'''
 
 #set the target distribution
 #generate 15 mu from 0 to 15
-mu = np.linspace(0,15,15)
+mu = np.linspace(0,31,8)
 #generate 15 sigma from 0 to 15
-sigma = np.linspace(0,15,15)
+sigma = np.linspace(0,31,8)
 #generate the target distribution
 #use mu and sigma to generate 15*15 target distribution
-for i in range(15):
-    for j in range(15):
+for i in range(6):
+    for j in range(6):
         target_distribution=gaussian(np.arange(2**num_qubit),mu[i],sigma[j])
         target_distribution=normalize_prob_distribution(target_distribution)
         target_statevector=normalize_state_vector(np.sqrt(target_distribution))
@@ -57,10 +72,12 @@ for i in range(15):
            cpu_count=cpu_count,
            path=path,
            optimizer=optimizer,
-           iter=iter,
+           maxiter=maxiter,
+           miniter=miniter,
            threshold=threshold,
-           num_types=num_types,
-           experiment=experiment)
+           experiment=experiment,
+           GPU=GPU)
+
         
 
 
