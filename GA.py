@@ -123,6 +123,7 @@ def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,
     #get the optimized probability distribution
     fidelity=get_fidelity(_statevector(Gene, theta.x, backend), target_statevector)
     depth=Gene.depth()
+    print(fidelity,depth,theta.x)
     return fidelity,depth,theta.x
 
 
