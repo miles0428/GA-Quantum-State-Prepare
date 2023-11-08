@@ -101,11 +101,9 @@ def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,
         theta: the optimized theta
     '''
     if kwargs['GPU']:
-        print('GPU')
         backend = qk.Aer.get_backend('statevector_simulator')
         backend.set_options(device='GPU')
     else:
-        print('no GPU')
         backend = qk.Aer.get_backend('statevector_simulator')
 
     num_parameters = Gene.num_parameters
@@ -420,9 +418,12 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         elif os.path.exists(f'{path}/{experiment}/{i}st_generation/result.npy'):
             if os.path.exists(f'{path}/{experiment}/{i+1}st_generation/random_gene.npy'):
                 print(f'generation {i} finished')
+                result = np.load(f'{path}/{experiment}/{i}st_generation/result.npy', allow_pickle=True)
+                record_depth[i%10] = np.array(result[index,1])
                 continue
             else:
                 result = np.load(f'{path}/{experiment}/{i}st_generation/result.npy', allow_pickle=True)
+                record_depth[i%10] = np.array(result[index,1])
                 random_gene = np.load(f'{path}/{experiment}/{i}st_generation/random_gene.npy', allow_pickle=True)
                 index=_get_index(result,threshold=threshold)
                 print(f'depth:{result[index,1]}\nfidelity:{result[index,0]}')
@@ -457,8 +458,14 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         #check convergence
         if i>=miniter-1: #check 10 generations before
             #check the standard deviation of the depth
-            if np.std(np.array(record_depth.values(),dtype=int))<1e-3:
+            r=[]
+            for i in record_depth.keys():
+                r.append(record_depth[i])
+            r=np.array(r).reshape(-1)
+            std = np.std(r)
+            if std<1e-3:
                 break
+
 
 
 if __name__ == '__main__':
