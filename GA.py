@@ -457,9 +457,9 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         #check convergence
         if i>=miniter-1: #check 10 generations before
             #check the standard deviation of the depth
-            if np.std(np.array(record_depth.values()))<1e-3:
+            if np.std(np.array(record_depth.values(),dtype=int))<1e-3:
                 break
 
 
 if __name__ == '__main__':
-    GA(np.array([1,0,0,0,0,0,0,-1])/np.sqrt(2), 3, iter=3, experiment='test')
+    GA(np.array([1,0,0,0,0,0,0,-1])/np.sqrt(2), 3, experiment='test')
