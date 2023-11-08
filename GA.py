@@ -434,10 +434,12 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
         os.makedirs(f'{path}/{experiment}/{i}st_generation',exist_ok=True)
         #use multiprocessing to speed up
         pool = mp.Pool(cpu_count)
+        print("start multiprocessing")
         result = pool.map(partial_get_fidelity_depth, random_gene)
         #mkdir ist_generation
         result=np.array(result,dtype=object)
         pool.close()
+        print("end multiprocessing")
         #save the result
         index=_get_index(result,threshold=threshold)
         print(f'depth:{result[index,1]}\nfidelity:{result[index,0]}')
