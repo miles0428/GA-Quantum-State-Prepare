@@ -34,20 +34,6 @@ maxiter = 100
 miniter = 10
 threshold = 0.90
 GPU = False
-'''
-'num_genes':20,
-'length_gene':10,
-'mutation_rate':0.1,
-'cpu_count':mp.cpu_count(),               
-'path':'data',
-'experiment':'test',
-'optimizer':optimizers.SPSA(maxiter=1000),
-'maxiter':30,
-'miniter':10, 
-'threshold':0.90,
-'num_types':7,
-'GPU':_gpu_avaliable()
-'''
 
 #set the target distribution
 #generate 15 mu from 0 to 15
@@ -56,8 +42,8 @@ mu = np.linspace(0,31,8)
 sigma = np.linspace(0,31,8)
 #generate the target distribution
 #use mu and sigma to generate 15*15 target distribution
-for i in range(6):
-    for j in range(6):
+for i in range(8):
+    for j in range(8):
         target_distribution=gaussian(np.arange(2**num_qubit),mu[i],sigma[j])
         target_distribution=normalize_prob_distribution(target_distribution)
         target_statevector=normalize_state_vector(np.sqrt(target_distribution))
