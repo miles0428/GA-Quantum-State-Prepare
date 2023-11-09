@@ -42,27 +42,28 @@ mu = np.linspace(0,31,8)
 sigma = np.linspace(1,20,8)
 #generate the target distribution
 #use mu and sigma to generate 15*15 target distribution
-for i in range(8):
-    for j in range(8):
-        target_distribution=gaussian(np.arange(2**num_qubit),mu[i],sigma[j])
-        target_distribution=normalize_prob_distribution(target_distribution)
-        target_statevector=normalize_state_vector(np.sqrt(target_distribution))
-        #set the experiment name as 'gaussian_mu_{mu}_sigma_{sigma}'
-        experiment = f'gaussian_mu_{mu[i]}_sigma_{sigma[j]}'
-        #do the experiment
-        GA(target_statevector=target_statevector,
-           num_qubit=num_qubit,
-           num_genes=num_genes,
-           length_gene=length_gene,
-           mutation_rate=mutation_rate,
-           cpu_count=cpu_count,
-           path=path,
-           optimizer=optimizer,
-           maxiter=maxiter,
-           miniter=miniter,
-           threshold=threshold,
-           experiment=experiment,
-           GPU=GPU)
+if __name__ == '__main__':
+    for i in range(8):
+        for j in range(8):
+            target_distribution=gaussian(np.arange(2**num_qubit),mu[i],sigma[j])
+            target_distribution=normalize_prob_distribution(target_distribution)
+            target_statevector=normalize_state_vector(np.sqrt(target_distribution))
+            #set the experiment name as 'gaussian_mu_{mu}_sigma_{sigma}'
+            experiment = f'gaussian_mu_{mu[i]}_sigma_{sigma[j]}'
+            #do the experiment
+            GA(target_statevector=target_statevector,
+            num_qubit=num_qubit,
+            num_genes=num_genes,
+            length_gene=length_gene,
+            mutation_rate=mutation_rate,
+            cpu_count=cpu_count,
+            path=path,
+            optimizer=optimizer,
+            maxiter=maxiter,
+            miniter=miniter,
+            threshold=threshold,
+            experiment=experiment,
+            GPU=GPU)
 
         
 

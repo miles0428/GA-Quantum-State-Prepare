@@ -83,7 +83,7 @@ class Gene_Circuit(object):
         '''
         
         #gene_gates is a list of gates use to generate the circuit
-        gene_gates = ['empty','rx','ry','rz','cx','h','x']
+        gene_gates = ['empty','rz','cx','h','x','sx']
         theta_index = 0
         circuit = qk.QuantumCircuit(self.num_qubit)
         gene = self.gene
@@ -96,7 +96,7 @@ class Gene_Circuit(object):
                     control = control % self.num_qubit
                 if gate == 'empty':
                     continue
-                elif gate in ['rx','ry','rz']:
+                elif gate in ['rx','ry','rz','sx']:
                     getattr(circuit,gate)(qk.circuit.Parameter(f'theta_{theta_index}'),i)
                     theta_index+=1
                 elif gate == 'cx':
