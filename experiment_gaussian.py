@@ -29,7 +29,7 @@ length_gene = 100
 mutation_rate = 0.05
 cpu_count = mp.cpu_count()
 path = 'data/GA-data/gaussian/diff-genetic'
-optimizer = optimizers.SPSA(maxiter=1000)
+optimizer = optimizers.COBYLA(maxiter=1000)
 maxiter = 100
 miniter = 10
 threshold = 0.90

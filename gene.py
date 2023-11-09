@@ -96,7 +96,7 @@ class Gene_Circuit(object):
                     control = control % self.num_qubit
                 if gate == 'empty':
                     continue
-                elif gate in ['rx','ry','rz','sx']:
+                elif gate in ['rx','ry','rz']:
                     getattr(circuit,gate)(qk.circuit.Parameter(f'theta_{theta_index}'),i)
                     theta_index+=1
                 elif gate == 'cx':
@@ -104,7 +104,7 @@ class Gene_Circuit(object):
                         continue
                     else:
                         circuit.cx(control,i)
-                elif gate in ['h','x']:
+                elif gate in ['h','x','sx']:
                     getattr(circuit,gate)(i)
 
         return circuit
