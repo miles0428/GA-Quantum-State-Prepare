@@ -23,10 +23,10 @@ import multiprocessing as mp
 from qiskit_algorithms import optimizers
 
 #set the parameters
-num_genes = mp.cpu_count()
+num_genes = mp.cpu_count()*2
 num_qubit = 5
 length_gene = 100
-mutation_rate = 0.1
+mutation_rate = 0.05
 cpu_count = mp.cpu_count()
 path = 'data/GA-data/gaussian/diff-genetic'
 optimizer = optimizers.SPSA(maxiter=1000)
