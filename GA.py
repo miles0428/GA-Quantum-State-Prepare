@@ -379,7 +379,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                       'maxiter':30,
                       'miniter':10, 
                       'threshold':0.90,
-                      'num_types':5,
+                      'num_types':7,
                       'GPU':_gpu_avaliable()}
     for key in kwargs_default.keys():
         if key not in kwargs.keys():
