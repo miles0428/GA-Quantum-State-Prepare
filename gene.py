@@ -83,14 +83,19 @@ class Gene_Circuit(object):
         '''
         
         #gene_gates is a list of gates use to generate the circuit
-        gene_gates = ['empty','rx','ry','rz','cx']
+        gene_gates = ['empty','empty','empty','rx','ry','rz','cx']
         theta_index = 0
         circuit = qk.QuantumCircuit(self.num_qubit)
         gene = self.gene
         gene = gene.transpose(1,0,2)
-        for G_nj in gene:
+        temp_last_gate = ['empty' for i in range(self.num_qubit)]
+        for j,G_nj in enumerate(gene):
             for i,G_ij in enumerate(G_nj):
                 gate = gene_gates[G_ij[0]]
+                if gate == temp_last_gate[i] and gate in ['rx','ry','rz']:
+                    continue
+                if gate is not 'empty':
+                    temp_last_gate[i] = gate
                 control = G_ij[1]
                 if control >= self.num_qubit:
                     control = control % self.num_qubit
@@ -104,6 +109,7 @@ class Gene_Circuit(object):
                         continue
                     else:
                         circuit.cx(control,i)
+                        temp_last_gate[control] = 'empty'
                 elif gate in ['h','x','sx']:
                     getattr(circuit,gate)(i)
 
