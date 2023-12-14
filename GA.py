@@ -468,7 +468,8 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
             #check the standard deviation of the depth
             r=[]
             for i in record_depth.keys():
-                r.append(record_depth[i])
+                for j in record_depth[i]:
+                    r.append(j)
             r=np.array(r).reshape(-1)
             std = np.std(r)
             if std<1e-3:
