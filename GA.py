@@ -94,6 +94,7 @@ def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,
     kwargs:
         optimizer: the optimizer of the circuit. Default: optimizers.SPSA(maxiter=1000)
         GPU: if the computer have an avaliable gpu. Default: False
+        initial_point: the initial point of the optimizer. Default: np.random.rand(num_parameters)
 
     Returns:
         fidelity: the optimized fidelity of the gene
@@ -107,7 +108,10 @@ def _get_optimized_fidelity(Gene : Gene_Circuit, target_statevector:np.ndarray ,
         backend = qk.Aer.get_backend('statevector_simulator')
 
     num_parameters = Gene.num_parameters
-    theta = np.random.rand(num_parameters)
+    if 'initial_point' in kwargs.keys():
+        theta = kwargs['initial_point']
+    else:
+        theta = np.random.rand(num_parameters)
     try:
         optimizer = kwargs['optimizer']
     except:
@@ -158,6 +162,8 @@ def _get_fidelity_depth(gene : list, **kwargs ) -> (float, int, np.ndarray):
     Gene = Gene_Circuit(gene, num_qubit)
     # print(gene)
     fidelity,depth,theta = _get_optimized_fidelity(Gene, target_statevector,optimizer=optimizer,GPU=kwargs['GPU'])
+    if kwargs['optimizer2'] != None:
+        fidelity,depth,theta = _get_optimized_fidelity(Gene, target_statevector,optimizer=kwargs['optimizer2'],GPU=kwargs['GPU'],initial_point=theta)
     # print(theta)
     # print(statevector(Gene, theta, qk.Aer.get_backend('statevector_simulator')), target_statevector)
     # print(fidelity)
@@ -376,6 +382,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                       'path':'data',
                       'experiment':'test',
                       'optimizer':optimizers.SPSA(maxiter=1000),
+                      'optimizer2':None,
                       'maxiter':30,
                       'miniter':10, 
                       'threshold':0.90,
@@ -390,6 +397,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
     path = kwargs['path']
     experiment = kwargs['experiment']
     optimizer = kwargs['optimizer']
+    optimizer2 = kwargs['optimizer2']
     maxiter = kwargs['maxiter']
     threshold = kwargs['threshold']
     num_types = kwargs['num_types']
@@ -405,6 +413,7 @@ def GA(target_statevector : np.ndarray ,num_qubit : int ,**kwargs):
                                          num_qubit=num_qubit, 
                                          target_statevector=target_statevector, 
                                          optimizer=optimizer,
+                                         optimizer2=optimizer2,
                                          GPU = kwargs['GPU'])
     os.makedirs(path,exist_ok=True)
     os.makedirs(f'{path}/{experiment}',exist_ok=True)
