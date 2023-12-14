@@ -89,20 +89,23 @@ class Gene_Circuit(object):
         gene = self.gene
         gene = gene.transpose(1,0,2)
         temp_last_gate = ['empty' for i in range(self.num_qubit)]
+        count_rgate = [0 for i in range(self.num_qubit)]
         for j,G_nj in enumerate(gene):
             for i,G_ij in enumerate(G_nj):
                 gate = gene_gates[G_ij[0]]
-                if gate == temp_last_gate[i] and gate in ['rx','ry','rz']:
+                if gate == temp_last_gate[i] and gate in ['rx','ry','rz','h','x','sx']:
                     continue
-                if gate is not 'empty':
-                    temp_last_gate[i] = gate
                 control = G_ij[1]
                 if control >= self.num_qubit:
                     control = control % self.num_qubit
                 if gate == 'empty':
                     continue
                 elif gate in ['rx','ry','rz']:
+                    if count_rgate[i]>=3:
+                        continue
                     getattr(circuit,gate)(qk.circuit.Parameter(f'theta_{theta_index}'),i)
+                    temp_last_gate[i] = gate
+                    count_rgate[i]+=1
                     theta_index+=1
                 elif gate == 'cx':
                     if control == i:
@@ -110,9 +113,13 @@ class Gene_Circuit(object):
                     else:
                         circuit.cx(control,i)
                         temp_last_gate[control] = 'empty'
+                        temp_last_gate[i] = gate
+                        count_rgate[control] = 0
+                        count_rgate[i] = 0
                 elif gate in ['h','x','sx']:
                     getattr(circuit,gate)(i)
-
+                    temp_last_gate[i] = gate
+                    count_rgate[i] = 0
         return circuit
     
 if __name__ == '__main__':
