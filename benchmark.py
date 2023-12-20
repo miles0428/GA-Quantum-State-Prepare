@@ -11,7 +11,7 @@ import multiprocessing as mp
 from qiskit import qpy
 import os
 
-
+mp.set_start_method('spawn',True)
 
 def initialize_circuit(num_qubits,statevector) -> qk.QuantumCircuit:
     basis_gates=["u3","u2","u1","cx","u0","u","p","x","y","z","h","s",
@@ -33,19 +33,37 @@ def main():
         target_statevectors.append(target_statevector)
     depths_initialize = []
     depths_GA = []
+    num_genes = mp.cpu_count()
+    num_qubit = 5
+    length_gene = 70
+    mutation_rate = 0.1
+    cpu_count = mp.cpu_count()//2
+    optimizer = optimizers.SPSA(maxiter=1500)
+    optimizer2 = optimizers.COBYLA(maxiter=1500)
+    maxiter = 100
+    miniter = 10
+    threshold = 0.6
+    cpu_count = mp.cpu_count()//2
+    GPU = False
     for i,target_statevector in enumerate(target_statevectors):
         experiment = f'benchmark/{i}'
-        GA(num_qubit = num_qubits,
-            target_statevector = target_statevector,
-            num_genes = mp.cpu_count(),
-            length_gene = 20,
-            mutation_rate = 0.2,
+        GA( target_statevector = target_statevector,
+            num_qubit = num_qubit,
+            num_genes = num_genes,
+            length_gene = length_gene,
+            mutation_rate = mutation_rate,
+            cpu_count = cpu_count,
             path = 'data',
             experiment = f'{experiment}/GA',
-            optimizer = optimizers.SPSA(maxiter=1000),
-            iter = 30,
-            threshold = 0.90,
-            num_types = 15)
+            optimizer = optimizer,
+            optimizer2 = optimizer2,
+            maxiter = maxiter,
+            miniter = miniter,
+            threshold = threshold,
+            GPU = GPU
+            )
+
+
         #initialize
         depths_GA.append(np.load(f'data/{experiment}/GA/best_gene.npy',allow_pickle=True).item()['depth'])
         circuit = initialize_circuit(num_qubits,target_statevector)
