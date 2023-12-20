@@ -11,16 +11,16 @@ The main use file is titled `GA.py`. We recommend cloning this repository and ru
 This project was built using Python 3.8.5. The required packages can be installed using the following command:
 #### No-GPU
 ```zsh
-pip install -r requirements.txt
+pip install -r requirement/requirement.txt
 ```
 #### NVIDIA-GPU
 For cuda11.
 ```zsh
-pip install -r requirements-cu11.txt
+pip install -r requirement/requirement-cu11.txt
 ```
 For cuda12.
 ```zsh
-pip install -r requirements-cu12.txt
+pip install -r requirement/requirement-cu12.txt
 ```
 
 
