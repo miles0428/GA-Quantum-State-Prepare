@@ -47,8 +47,10 @@ def draw_prob_distribution(gene : list,
     plt.clf()
     plt.bar(range(2**num_qubit), prob_distribution)
     plt.plot(np.arange(2**num_qubit), target_distribution, label='target_distribution')
-    plt.ylim(0,0.4)    
+    plt.ylim(0,max(max(prob_distribution),max(target_distribution))*1.1)
     plt.savefig(filename)
+    plt.close()
+
 
 def load_results_from_file(filename:str)->np.ndarray:
     '''
@@ -156,16 +158,19 @@ def draw_fidelity_change_from_result(path : str,
     plt.clf()
     plt.plot(range(generation_number), fidelity_change)
     plt.savefig(f'{path}/{expriement}/fidelity_change.png')
+    plt.close()
 
 def draw_depth_change_from_result(path : str, 
                                   expriement : str, 
-                                  generation_number : int)->None:
+                                  generation_number : int,
+                                  save_path : str = None)->None:
     '''
     Draw the depth change with generation
     Args:
         path: the path of the file
         expriement: the name of the expriement
         generation_number: number of generation
+        save_path: the path to save the picture
     Returns:
         None
     '''
@@ -179,16 +184,19 @@ def draw_depth_change_from_result(path : str,
         depth_change.append(sum(results[i][:,1])/len(results[i][:,1]))
     plt.clf()
     plt.plot(range(generation_number), depth_change)
-    plt.savefig(f'{path}/{expriement}/depth_change.png')
-
+    if save_path is None:
+        plt.savefig(f'{path}/{expriement}/depth_change.png')
+    else:
+        plt.savefig(save_path)
+    plt.close()
 
 if __name__ == '__main__':
-    path = 'data'
-    expriement = 'tset'
-    num_qubit = 3
-    generation_number = 30
-    target_distribution = np.array([0.7, 0.7,0,0,0,0,0,0])
+    path = '.'
+    expriement = 'gaussian_mu_13.285714285714286_sigma_9.142857142857142'
+    num_qubit = 4
+    generation_number = 100
+    # target_distribution = np.array([0.7, 0.7,0,0,0,0,0,0])
     draw_depth_change_from_result(path, expriement, generation_number)
     draw_fidelity_change_from_result(path, expriement, generation_number)
-    draw_prob_distribution_from_result(path, expriement, target_distribution, num_qubit, generation_number)
-    draw_gene_circuit_from_result(path, expriement, num_qubit, generation_number)
+    # draw_prob_distribution_from_result(path, expriement, target_distribution, num_qubit, generation_number)
+    # draw_gene_circuit_from_result(path, expriement, num_qubit, generation_number)
