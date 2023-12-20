@@ -120,6 +120,7 @@ class Gene_Circuit(object):
                     getattr(circuit,gate)(i)
                     temp_last_gate[i] = gate
                     count_rgate[i] = 0
+        # circuit.draw("mpl",filename='test3.png')
         return circuit
     
 if __name__ == '__main__':
