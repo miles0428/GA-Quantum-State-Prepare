@@ -53,7 +53,8 @@ def w_state(n):
     state = np.zeros(2**n)
     for i in range(n):
         state[2**i] = 1
-    state = normalize_state_vector(state)
+    return normalize_state_vector(state)
+
 
 if __name__ == '__main__':
     target_statevector = w_state(num_qubit)

@@ -97,6 +97,7 @@ def draw_gene_circuit_from_result(path : str ,
     os.makedirs(f'{path}/{expriement}/smallest_circuit',exist_ok=True)
     for i in range(generation_number):
         Gene_Circuit(genes[i][0], num_qubit).draw(output='mpl', filename=f'{path}/{expriement}/smallest_circuit/generation_{i}_smallest_depth_gene.png')
+        plt.close()
 
 def draw_prob_distribution_from_result(path : str, 
                                        expriement : str, 
@@ -191,12 +192,15 @@ def draw_depth_change_from_result(path : str,
     plt.close()
 
 if __name__ == '__main__':
-    path = '.'
-    expriement = 'gaussian_mu_13.285714285714286_sigma_9.142857142857142'
-    num_qubit = 4
+    path = 'w-state-2'
+    expriement = 'w-state-n=5'
+    num_qubit = 5
     generation_number = 100
+    from experiment_w_state import w_state
+    from transform import statevector2prob
+    target_distribution = statevector2prob(w_state(num_qubit))
     # target_distribution = np.array([0.7, 0.7,0,0,0,0,0,0])
     draw_depth_change_from_result(path, expriement, generation_number)
-    draw_fidelity_change_from_result(path, expriement, generation_number)
-    # draw_prob_distribution_from_result(path, expriement, target_distribution, num_qubit, generation_number)
-    # draw_gene_circuit_from_result(path, expriement, num_qubit, generation_number)
+    # draw_fidelity_change_from_result(path, expriement, generation_number)
+    draw_prob_distribution_from_result(path, expriement, target_distribution, num_qubit, generation_number)
+    draw_gene_circuit_from_result(path, expriement, num_qubit, generation_number)
