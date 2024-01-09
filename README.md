@@ -99,23 +99,29 @@ Here, $G_{ij}$ is the j-th gate of the i-th qubit. Each $G_{ij}$ is represented 
 ### w-state (5 qubits)
 
 - circuit
+
 ![circuit](figure/wstate/generation_99_smallest_depth_gene.png)
 
 - probability distribution
+
 ![probability distribution](figure/wstate/generation_99_smallest_depth_gene_prob_distribution.png)
 
 - depth v.s. iter
+
 ![depth v.s. iter](figure/wstate/depth_change.png)
 
 ### gaussian state (5 qubits)
 
 - circuit
+
 ![circuit](figure/gaussian/circuit_mu_13.29_sigma_3.71.svg)
 
 - probability distribution
+
 ![probability distribution](figure/gaussian/distribution_mu_13.29_sigma_3.71.svg)
 
 - depth v.s. iter
+
 ![depth v.s. iter](figure/gaussian/depth_change_mu_13.29_sigma_3.71.svg)
 
 ## Environment setup
